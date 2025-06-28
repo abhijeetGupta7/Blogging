@@ -43,7 +43,7 @@ export default function Header() {
         </Button>
 
         <Link to="/sign-in">
-          <Button className="bg-gradient-to-br from-purple-600 to-blue-500 text-white hover:bg-gradient-to-bl focus:ring-blue-300 dark:focus:ring-blue-800">
+          <Button outline className="hover:bg-gradient-to-br hover:from-purple-600 hover:to-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300">
             Sign In
           </Button>
         </Link>
