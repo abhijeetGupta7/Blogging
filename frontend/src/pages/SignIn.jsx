@@ -1,14 +1,17 @@
 import { Alert, Button, Label, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import { signInFailure, signInStart, signInSuccess } from "../redux/user/userSlice";
 
 export default function SignIn() {
- const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const dispatch=useDispatch();
+  const { loading:isLoading, error:errorMessage } = useSelector((state)=>state.user);
 
   const [formData, setformData] = useState({});
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [isLoading, setisLoading] = useState(false);
 
   const handleChange = (e) => {
     setformData({ ...formData, [e.target.id]: e.target.value.trim() });
@@ -19,12 +22,11 @@ export default function SignIn() {
 
     // Basic password length validation
     if (!formData.password || formData.password.length < 6) {
-      return setErrorMessage("Password must be at least 6 characters.");
+      return dispatch(signInFailure("Password must be at least 6 characters."));
     }
 
     try {
-      setisLoading(true);
-      setErrorMessage(null);
+      dispatch(signInStart());
 
       const res = await fetch("/api/auth/signin", {
         method: "POST",
@@ -34,19 +36,17 @@ export default function SignIn() {
 
       const data = await res.json();
 
+      if (data.success===false) {
+        return dispatch(signInFailure(data.message));
+      }
       if (res.ok) {
+        dispatch(signInSuccess(data));
         navigate("/dashboard");
       }
 
-      if (!data.success) {
-        return setErrorMessage(data.message);
-      }
-
     } catch (error) {
-      setErrorMessage(error.message || "Something went wrong");
-    } finally {
-      setisLoading(false);
-    }
+      dispatch(signInFailure(error.message || "Something went wrong"));
+    } 
   };
 
   return (
@@ -113,7 +113,7 @@ export default function SignIn() {
                   <span className="pl-3">Loading...</span>
                 </>
               ) : (
-                "Sign Up"
+                "Sign In"
               )}
             </Button>
           </form>
@@ -122,7 +122,7 @@ export default function SignIn() {
           <div className="mt-2 text-sm">
             <span>Don't have an account?</span>
             <Link to="/sign-up" className="text-blue-600 pl-2 font-bold hover:underline">
-              Sign In
+              Sign Up
             </Link>
           </div>
 
