@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp';
 import Projects from './pages/Projects';
 import Home from './pages/Home';
 import Header from './components/Header';
+import Footer from './components/Footer';
 
 function App() {
   
@@ -21,6 +22,7 @@ function App() {
         <Route path='/sign-up' element={<SignUp />}/>
         <Route path='/projects' element={<Projects />}/>
       </Routes>
+      <Footer />
     </BrowserRouter>
       
     </>
