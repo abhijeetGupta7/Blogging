@@ -23,6 +23,12 @@ const signup = async (req, res, next) => {
     await newUser.save();
     res.json('Signup successful');
   } catch (error) {
+    console.log(error)
+    if(error.code==11000) {
+      const duplicateKey=Object.keys(error.keyValue)[0];
+      error.message=`${duplicateKey.charAt(0).toUpperCase() + duplicateKey.slice(1)} already Exist`
+      error.statusCode=StatusCodes.CONFLICT
+    }
     next(error);
   }
 };

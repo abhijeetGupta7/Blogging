@@ -24,7 +24,7 @@ export default function Header() {
         <span className="px-2 py-1 bg-gradient-to-r from bg-indigo-500 via-purple-500 to-pink-500 text-white rounded-lg">
           Abhijeet's
         </span>
-        Blog
+        <span className="text-black">Blog</span>
       </Link>
 
       <form>
