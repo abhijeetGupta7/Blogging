@@ -1,6 +1,6 @@
 import {
+  Avatar,
   Button,
-  DarkThemeToggle,
   Navbar,
   NavbarCollapse,
   NavbarLink,
@@ -9,14 +9,22 @@ import {
 } from "flowbite-react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
+import {
+  Dropdown,
+  DropdownDivider,
+  DropdownHeader,
+  DropdownItem,
+} from "flowbite-react";
+import { HiLogout, HiViewGrid } from "react-icons/hi";
 
 export default function Header() {
   const path = useLocation().pathname;
+  const { currentUser: user } = useSelector((state) => state.user);
 
   return (
     <Navbar className="border-b-2 border-gray-200">
-      
       <Link
         to="/"
         className="self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white"
@@ -44,11 +52,36 @@ export default function Header() {
           <FaMoon />
         </Button>
 
-        <Link to="/sign-in">
-          <Button outline className="hover:bg-gradient-to-br hover:from-purple-600 hover:to-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300">
-            Sign In
-          </Button>
-        </Link>
+        {user ? (
+          <Dropdown 
+            arrowIcon={false}
+            inline
+            label={
+              <Avatar alt="user" img={user.profilePicture} className="hover:border-1 hover:border-blue-500"/>
+            }
+          >
+            <DropdownHeader>
+              <span className="block text-sm">{user.username}</span>
+              <span className="block truncate text-sm font-medium">
+                {user.email}
+              </span>
+            </DropdownHeader>
+            <Link to={"/dashboard?tab=profile"}>
+              <DropdownItem icon={HiViewGrid}>Profile</DropdownItem>
+            </Link>
+            <DropdownDivider />
+            <DropdownItem icon={HiLogout}>Sign out</DropdownItem>
+          </Dropdown>
+        ) : (
+          <Link to="/sign-in">
+            <Button
+              outline
+              className="hover:bg-gradient-to-br hover:from-purple-600 hover:to-blue-500 focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-800 transition-all duration-300"
+            >
+              Sign In
+            </Button>
+          </Link>
+        )}
 
         <NavbarToggle />
       </div>

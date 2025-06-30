@@ -2,12 +2,18 @@ import { Alert, Button, Label, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { signInFailure, signInStart, signInSuccess } from "../redux/user/userSlice";
 import Oauth from "../components/Oauth";
 
 export default function SignIn() {
+  const { currentUser: user } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  console.log(user);
+
+  if(user) {    
+    return <Navigate to="/dashboard" />;
+  }
 
   const dispatch=useDispatch();
   const { loading:isLoading, error:errorMessage } = useSelector((state)=>state.user);

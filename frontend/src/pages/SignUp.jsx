@@ -1,11 +1,19 @@
 import { Alert, Button, Label, TextInput } from "flowbite-react";
 import { useState } from "react";
 import { FaSpinner } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
+import Oauth from "../components/Oauth";
+import { useSelector } from "react-redux";
 
 export default function SignUp() {
+  const { currentUser: user } = useSelector((state) => state.user);
+  
+  if(user) {
+    return <Navigate to="/dashboard" />;
+  }
+  
   const navigate = useNavigate();
-
+  
   const [formData, setformData] = useState({});
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setisLoading] = useState(false);
@@ -129,6 +137,8 @@ export default function SignUp() {
                 "Sign Up"
               )}
             </Button>
+
+            <Oauth />
           </form>
 
           {/* Link to sign in page */}
