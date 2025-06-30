@@ -4,6 +4,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { signInFailure, signInStart, signInSuccess } from "../redux/user/userSlice";
+import Oauth from "../components/Oauth";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -116,6 +117,9 @@ export default function SignIn() {
                 "Sign In"
               )}
             </Button>
+
+             <Oauth />
+
           </form>
 
           {/* Link to sign in page */}

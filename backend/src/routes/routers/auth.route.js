@@ -1,6 +1,6 @@
 const express = require('express');
 const validateRequest = require('../../middlewares/validator');
-const { signup, signin } = require('../../controllers/auth.controller');
+const { signup, signin, google } = require('../../controllers/auth.controller');
 const { body } = require('express-validator');
 
 
@@ -29,5 +29,14 @@ authRouter.post(
   ],
   signin
 );
+
+authRouter.post(
+  '/google',
+  [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('name').notEmpty().withMessage('Valid name is required'),
+  ],
+  google
+)
 
 module.exports=authRouter;
