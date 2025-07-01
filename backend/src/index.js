@@ -3,8 +3,10 @@ const { PORT } = require('./config/server-config');
 const { connecToDB } = require('./config/db-config');
 const cors=require('cors');
 const apiRouter = require('./routes/api.router');
+const cookieParser = require('cookie-parser');
 const app=express();
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cors({

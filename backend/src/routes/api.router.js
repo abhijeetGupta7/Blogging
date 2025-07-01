@@ -5,7 +5,7 @@ const authRouter = require('./routers/auth.route');
 const apiRouter=express.Router();
 
 apiRouter.use("/auth",authRouter)
-// apiRouter.use("/user",userRouter)
+apiRouter.use("/user",userRouter)
 
 apiRouter.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
