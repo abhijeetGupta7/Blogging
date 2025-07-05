@@ -1,6 +1,5 @@
 const express = require('express');
-const validateRequest = require('../../middlewares/validator');
-const { updateProfile } = require('../../controllers/user.controller');
+const { updateProfile, deleteUser, signoutUser } = require('../../controllers/user.controller');
 const multer = require("multer");
 const { authenticateUser } = require('../../middlewares/autheticateUser');
 
@@ -23,5 +22,7 @@ const upload = multer({
 });
 
 userRouter.put('/profile', authenticateUser , upload.single('file') , updateProfile); 
+userRouter.delete('/delete', authenticateUser, deleteUser);
+userRouter.post('/signout', authenticateUser, signoutUser);
 
 module.exports=userRouter;

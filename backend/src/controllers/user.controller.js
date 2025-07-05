@@ -18,21 +18,22 @@ async function updateProfile(req, res) {
       return res.status(404).json(errorHandler(404, 'User not found'));
     }
 
-    // Update fields
+    // Update basic fields
     if (req.body.username) user.username = req.body.username;
     if (req.body.email) user.email = req.body.email;
     if (req.body.password) {
       user.password = await hashPassword(req.body.password);
     }
 
-    // Upload image if present
+    // Upload new image if provided
     if (req.file) {
       const streamUpload = (buffer) => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             {
               folder: "profile_images",
-              public_id: user.username, 
+              public_id: req.user.id, 
+              overwrite: true,
             },
             (error, result) => {
               if (error) reject(error);
@@ -60,7 +61,56 @@ async function updateProfile(req, res) {
   }
 }
 
+async function deleteUser(req, res) {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json(errorHandler(404, "User not found"));
+    }
+
+    // Delete profile image if exists
+    if (user.profilePicture) {
+      try {
+        await cloudinary.uploader.destroy(`profile_images/${req.user.id}`);
+      } catch (err) {
+        console.warn("Cloudinary image deletion failed:", err.message);
+      }
+    }
+
+    const deletedUser = await User.findByIdAndDelete(req.user.id);
+
+    if (deletedUser) {
+      return res.status(200).json({
+        message: "User deleted successfully",
+      });
+    } else {
+      return res.status(404).json(errorHandler(404, 'User not found '));
+    }
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json(errorHandler(500, "Something went wrong while deleting user"));
+  }
+}
+
+async function signoutUser(req, res) {
+  try {
+    res
+      .clearCookie('access_token', {
+        httpOnly: true,
+      })
+      .status(200)
+      .json({ message: 'User signed out successfully' });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json(errorHandler(500, 'Something went wrong'));
+  }
+}
 
 module.exports = {
   updateProfile,
+  deleteUser,
+  signoutUser
 };

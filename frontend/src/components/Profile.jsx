@@ -2,10 +2,17 @@ import { Spinner, Alert, Button, TextInput } from "flowbite-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteProfileFailure,
+  deleteProfileSuccess,
+  signoutUserFailure,
+  signoutUserSuccess,
   updateProfileFailure,
   updateProfileStart,
   updateProfileSuccess,
 } from "../redux/user/userSlice";
+
+import {  Modal, ModalBody, ModalHeader } from "flowbite-react";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 export default function DashProfile() {
   const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -15,6 +22,7 @@ export default function DashProfile() {
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(null);
   const [changePassword, setChangePassword] = useState(false); // Toggle for password input
+  const [showModal, setShowModal] = useState(false);
 
   const fileInputRef = useRef();
   const dispatch = useDispatch();
@@ -92,10 +100,42 @@ export default function DashProfile() {
         setSuccess("Profile updated successfully");
         dispatch(updateProfileSuccess(data.user));
       }
-    } catch (err) {
+    } catch {
       dispatch(updateProfileFailure("Something went wrong"));
     }
   };
+
+  const handleDeleteUser=async ()=>{
+    try {
+       const res = await fetch("/api/user/delete", {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if(!res.ok) {
+        const data=res.json();
+        dispatch(deleteProfileFailure((data.message || "Delete failed")))
+      }
+      dispatch(deleteProfileSuccess());
+    } catch {
+      dispatch(deleteProfileFailure("Something went wrong"));
+    }
+  }
+
+  const handleSignout=async ()=>{
+    try {
+       const res = await fetch("/api/user/signout", {
+        method:"POST",
+        credentials: "include",
+      });
+      if(!res.ok) {
+        const data=res.json();
+        dispatch(signoutUserFailure((data.message || "Singout failed")))
+      }
+      dispatch((signoutUserSuccess()));
+    } catch {
+      dispatch(signoutUserFailure("Something went wrong"));
+    }
+  }
 
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
@@ -181,14 +221,45 @@ export default function DashProfile() {
         {/* Alerts */}
         {error && <Alert color="failure">{error}</Alert>}
         {success && <Alert color="success">{success}</Alert>}
+
+        <Modal
+          show={showModal}
+          size="md"
+          onClose={() => setShowModal(false)}
+          popup
+        >
+          <ModalHeader />
+          <ModalBody>
+            <div className="text-center">
+              <HiOutlineExclamationCircle className="mx-auto mb-4 h-14 w-14 text-gray-400 dark:text-gray-200" />
+              <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+                Are you sure you want to delete your account ?
+              </h3>
+              <div className="flex justify-center gap-4">
+                <Button color="red" onClick={handleDeleteUser}>
+                  Yes, I'm sure
+                </Button>
+                <Button color="alternative" onClick={() => setShowModal(false)}>
+                  No, cancel
+                </Button>
+              </div>
+            </div>
+          </ModalBody>
+        </Modal>
+
       </form>
 
       {/* Account actions */}
       <div className="text-red-500 flex justify-between mt-5">
-        <span className="cursor-pointer border-2 p-1 rounded-xl hover:font-semibold">
+        <span
+          className="cursor-pointer border-2 p-1 rounded-xl hover:font-semibold"
+          onClick={() => setShowModal(true)}
+        >
           Delete Account
         </span>
-        <span className="cursor-pointer border-2 p-1 rounded-xl hover:font-semibold">
+        <span className="cursor-pointer border-2 p-1 rounded-xl hover:font-semibold"
+          onClick={handleSignout}
+        >
           Sign Out
         </span>
       </div>

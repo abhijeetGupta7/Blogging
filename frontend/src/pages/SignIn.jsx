@@ -9,16 +9,15 @@ import Oauth from "../components/Oauth";
 export default function SignIn() {
   const { currentUser: user } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  console.log(user);
+  const { loading:isLoading, error:errorMessage } = useSelector((state)=>state.user);
+  const [formData, setformData] = useState({});
+  const dispatch=useDispatch();
 
   if(user) {    
     return <Navigate to="/dashboard" />;
   }
 
-  const dispatch=useDispatch();
-  const { loading:isLoading, error:errorMessage } = useSelector((state)=>state.user);
 
-  const [formData, setformData] = useState({});
 
   const handleChange = (e) => {
     setformData({ ...formData, [e.target.id]: e.target.value.trim() });

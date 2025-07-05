@@ -7,16 +7,14 @@ import { useSelector } from "react-redux";
 
 export default function SignUp() {
   const { currentUser: user } = useSelector((state) => state.user);
-  
-  if(user) {
-    return <Navigate to="/dashboard" />;
-  }
-  
   const navigate = useNavigate();
-  
   const [formData, setformData] = useState({});
   const [errorMessage, setErrorMessage] = useState(null);
   const [isLoading, setisLoading] = useState(false);
+
+  if(user) {
+    return <Navigate to="/dashboard" />;
+  }
 
   const handleChange = (e) => {
     setformData({ ...formData, [e.target.id]: e.target.value.trim() });
