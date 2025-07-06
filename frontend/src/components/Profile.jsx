@@ -11,8 +11,9 @@ import {
   updateProfileSuccess,
 } from "../redux/user/userSlice";
 
-import {  Modal, ModalBody, ModalHeader } from "flowbite-react";
+import { Modal, ModalBody, ModalHeader } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { Link } from "react-router-dom";
 
 export default function DashProfile() {
   const { currentUser, error, loading } = useSelector((state) => state.user);
@@ -105,37 +106,37 @@ export default function DashProfile() {
     }
   };
 
-  const handleDeleteUser=async ()=>{
+  const handleDeleteUser = async () => {
     try {
-       const res = await fetch("/api/user/delete", {
+      const res = await fetch("/api/user/delete", {
         method: "DELETE",
         credentials: "include",
       });
-      if(!res.ok) {
-        const data=res.json();
-        dispatch(deleteProfileFailure((data.message || "Delete failed")))
+      if (!res.ok) {
+        const data = res.json();
+        dispatch(deleteProfileFailure(data.message || "Delete failed"));
       }
       dispatch(deleteProfileSuccess());
     } catch {
       dispatch(deleteProfileFailure("Something went wrong"));
     }
-  }
+  };
 
-  const handleSignout=async ()=>{
+  const handleSignout = async () => {
     try {
-       const res = await fetch("/api/user/signout", {
-        method:"POST",
+      const res = await fetch("/api/user/signout", {
+        method: "POST",
         credentials: "include",
       });
-      if(!res.ok) {
-        const data=res.json();
-        dispatch(signoutUserFailure((data.message || "Singout failed")))
+      if (!res.ok) {
+        const data = res.json();
+        dispatch(signoutUserFailure(data.message || "Singout failed"));
       }
-      dispatch((signoutUserSuccess()));
+      dispatch(signoutUserSuccess());
     } catch {
       dispatch(signoutUserFailure("Something went wrong"));
     }
-  }
+  };
 
   return (
     <div className="max-w-lg mx-auto p-3 w-full">
@@ -218,6 +219,18 @@ export default function DashProfile() {
           )}
         </Button>
 
+        {/* Create Post Button */}
+         {currentUser.isAdmin && (
+          <Link to={'/create-post'}>
+            <Button
+              type='button'
+              className='w-full'
+            >
+              Create a post
+            </Button>
+          </Link>
+        )}
+
         {/* Alerts */}
         {error && <Alert color="failure">{error}</Alert>}
         {success && <Alert color="success">{success}</Alert>}
@@ -246,7 +259,6 @@ export default function DashProfile() {
             </div>
           </ModalBody>
         </Modal>
-
       </form>
 
       {/* Account actions */}
@@ -257,7 +269,8 @@ export default function DashProfile() {
         >
           Delete Account
         </span>
-        <span className="cursor-pointer border-2 p-1 rounded-xl hover:font-semibold"
+        <span
+          className="cursor-pointer border-2 p-1 rounded-xl hover:font-semibold"
           onClick={handleSignout}
         >
           Sign Out
