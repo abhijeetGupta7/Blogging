@@ -1,4 +1,4 @@
-import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
+import { Alert, Button, FileInput, Select, Spinner, TextInput } from "flowbite-react";
 import BlogEditor from "../components/BlogEditor";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ export default function CreatePost() {
 
   const [blogImageUrl, setBlogImageUrl] = useState(null);
   const [error,setError]=useState(null);
+  const [loading,setLoading]=useState(false);
   const navigate=useNavigate();
 
   // Handle text/select input changes
@@ -47,7 +48,7 @@ export default function CreatePost() {
   // Handle form submit
   async function handleSubmit(e) {
     e.preventDefault();
-
+    setLoading(true);
     const { title, category, content, image } = form;
 
     if (!title || !category || !content) {
@@ -82,6 +83,7 @@ export default function CreatePost() {
         image: null,
       });
       setBlogImageUrl(null);
+      setLoading(false);
       navigate(`/post/${data.slug}`);
 
     } catch (error) {
@@ -142,8 +144,16 @@ export default function CreatePost() {
         <BlogEditor text={form.content} setText={handleContentChange} />
 
         {/* Submit Button */}
-        <Button type="submit" size="sm">
-          Publish Post
+        <Button type="submit" size="sm" disabled={loading}>
+          {
+            loading ? (
+              <span className="flex items-center gap-2">
+              <Spinner size="sm" /> Publishing...
+            </span>
+            ) : (
+              "Publish Post"
+            )
+          }
         </Button>
 
         {error && (

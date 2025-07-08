@@ -2,7 +2,7 @@ const express = require('express');
 const validateRequest = require('../../middlewares/validator');
 const { body } = require('express-validator');
 const { authenticateUser } = require('../../middlewares/autheticateUser');
-const { createPost } = require('../../controllers/post.controller');
+const { createPost, getPosts, deletePost } = require('../../controllers/post.controller');
 const multer = require('multer');
 
 const postRouter=express.Router();
@@ -35,5 +35,16 @@ postRouter.post(
   validateRequest, 
   authenticateUser, createPost
 );
+
+postRouter.get(
+  '/getPosts',
+  authenticateUser, getPosts
+);
+
+postRouter.delete(
+  '/deletePost/:postId',
+  authenticateUser, deletePost
+);
+
 
 module.exports=postRouter;
