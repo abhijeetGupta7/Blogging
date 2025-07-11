@@ -74,7 +74,7 @@ async function deleteUser(req, res) {
       try {
         await cloudinary.uploader.destroy(`profile_images/${req.user.id}`);
       } catch (err) {
-        console.warn("Cloudinary image deletion failed:", err.message);
+        console.log("Cloudinary image deletion failed:", err.message);
       }
     }
 
@@ -94,6 +94,36 @@ async function deleteUser(req, res) {
   }
 }
 
+async function deleteUserByAdmin(req, res, next) {
+  if (!req.user.isAdmin) {
+    return next(errorHandler(403, 'You are not allowed to delete this user'));
+  }
+  
+  try {
+    const user = await User.findById(req.params.userId); 
+    if (!user) {
+      return next(errorHandler(404, 'User not found'));
+    }
+    
+    // Delete profile image if exists
+    if (user.profilePicture) {
+      try {
+        await cloudinary.uploader.destroy(`profile_images/${user._id}`);  
+      } catch (err) {
+        console.log("Cloudinary image deletion failed:", err.message);
+      }
+    }
+    
+    await User.findByIdAndDelete(req.params.userId);
+
+    return res.status(200).json({
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    next(errorHandler(500, 'Something went wrong while deleting user'));
+  }
+}
+
 async function signoutUser(req, res) {
   try {
     res
@@ -110,8 +140,52 @@ async function signoutUser(req, res) {
   }
 }
 
+async function getUsers(req,res,next) {
+  if (!req.user.isAdmin) {
+    return next(errorHandler(403, 'You are not allowed to see all users'));
+  }
+  try {
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const limit = parseInt(req.query.limit) || 9;
+    const sortDirection = req.query.sort === 'asc' ? 1 : -1;
+
+    const users = await User.find()
+      .sort({ createdAt: sortDirection })
+      .skip(startIndex)
+      .limit(limit);
+
+    const usersWithoutPassword = users.map((user) => {
+      const { password, ...rest } = user.toObject();
+      return rest;
+    });
+
+    const totalUsers = await User.countDocuments();
+
+    const now = new Date();
+
+    const oneMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate()
+    );
+    const lastMonthUsers = await User.countDocuments({
+      createdAt: { $gte: oneMonthAgo },
+    });
+
+    res.status(200).json({
+      users: usersWithoutPassword,
+      totalUsers,
+      lastMonthUsers,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   updateProfile,
   deleteUser,
-  signoutUser
-};
+  signoutUser,
+  getUsers,
+  deleteUserByAdmin
+}

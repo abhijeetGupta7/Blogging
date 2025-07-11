@@ -5,7 +5,7 @@ import {
   SidebarItems,
 } from "flowbite-react";
 import { useEffect, useState } from "react";
-import { HiDocument, HiTable, HiUser } from "react-icons/hi";
+import { HiDocument, HiTable, HiUser, HiUsers } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
@@ -47,6 +47,20 @@ export default function DashSideBar() {
               className="hover:bg-gray-300"
             >
               Posts
+            </SidebarItem>
+          )}
+
+          
+          {currentUser.isAdmin && (
+            <SidebarItem
+              as={Link}
+              to="/dashboard?tab=users"
+              active={tab === "users"}
+              icon={HiUsers}
+              labelColor="dark"
+              className="hover:bg-gray-300"
+            >
+              Users
             </SidebarItem>
           )}
 
