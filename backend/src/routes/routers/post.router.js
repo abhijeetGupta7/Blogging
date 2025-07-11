@@ -2,7 +2,7 @@ const express = require('express');
 const validateRequest = require('../../middlewares/validator');
 const { body } = require('express-validator');
 const { authenticateUser } = require('../../middlewares/autheticateUser');
-const { createPost, getPosts, deletePost } = require('../../controllers/post.controller');
+const { createPost, getPosts, deletePost, updatePost } = require('../../controllers/post.controller');
 const multer = require('multer');
 
 const postRouter=express.Router();
@@ -44,6 +44,12 @@ postRouter.get(
 postRouter.delete(
   '/deletePost/:postId',
   authenticateUser, deletePost
+);
+
+postRouter.patch(
+  '/update-post/:postId',
+  upload.single('file'),
+  authenticateUser, updatePost
 );
 
 

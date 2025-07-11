@@ -135,25 +135,69 @@ const deletePost = async (req, res, next) => {
 
 // Update Post
 const updatePost = async (req, res, next) => {
-    if (!req.user.isAdmin || req.user.id !== req.params.userId) {
-        return next(errorHandler(403, 'You are not allowed to update this post'));
+    if (!req.user.isAdmin) {
+        return next(errorHandler(StatusCodes.FORBIDDEN, 'You are not allowed to update this post'));
     }
 
     try {
+        const existingPost = await Post.findById(req.params.postId);
+        if (!existingPost) {
+            return next(errorHandler(StatusCodes.NOT_FOUND, 'Post not found'));
+        }
+
+        let imageUrl = existingPost.image; // Default to current image
+
+        // Handle new image upload if provided
+        if (req.file) {
+            const publicId = `${req.body.title.replace(/\s+/g, '-')}-${Date.now()}`;
+            const streamUpload = (buffer) => {
+                return new Promise((resolve, reject) => {
+                    const stream = cloudinary.uploader.upload_stream(
+                        {
+                            folder: "blog_images",
+                            public_id: publicId,
+                            overwrite: true,
+                        },
+                        (error, result) => {
+                            if (error) reject(error);
+                            else resolve(result);
+                        }
+                    );
+                    streamifier.createReadStream(buffer).pipe(stream);
+                });
+            };
+
+            try {
+                const result = await streamUpload(req.file.buffer);
+                imageUrl = result.secure_url;
+            } catch (err) {
+                return next(errorHandler(500, 'Image upload failed'));
+            }
+        }
+
+        const slug = req.body.title
+            ? req.body.title
+                  .split(' ')
+                  .join('-')
+                  .toLowerCase()
+                  .replace(/[^a-zA-Z0-9-]/g, '')
+            : existingPost.slug;
+
         const updatedPost = await Post.findByIdAndUpdate(
             req.params.postId,
             {
                 $set: {
-                    title: req.body.title,
-                    content: req.body.content,
-                    category: req.body.category,
-                    image: req.body.image,
+                    title: req.body.title || existingPost.title,
+                    content: req.body.content || existingPost.content,
+                    category: req.body.category || existingPost.category,
+                    image: imageUrl,
+                    slug: slug,
                 },
             },
             { new: true }
         );
 
-        return res.status(200).json(updatedPost);
+        return res.status(StatusCodes.OK).json(updatedPost);
     } catch (error) {
         next(error);
     }
