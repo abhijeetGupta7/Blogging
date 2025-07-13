@@ -6,13 +6,15 @@ import {
 } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { HiDocument, HiTable, HiUser, HiUsers } from "react-icons/hi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
+import { signoutUserFailure, signoutUserSuccess } from "../redux/user/userSlice";
+
 
 export default function DashSideBar() {
   const location = useLocation();
   const [tab, setTab] = useState("");
-  
+  const dispatch=useDispatch();
   const {currentUser}=useSelector((state)=>state.user);
 
   useEffect(() => {
@@ -20,6 +22,22 @@ export default function DashSideBar() {
     const tabFromUrl = urlParams.get("tab");
     if (tabFromUrl) setTab(tabFromUrl);
   }, [location.search]);
+
+   const handleSignout = async () => {
+      try {
+        const res = await fetch("/api/user/signout", {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const data = res.json();
+          dispatch(signoutUserFailure(data.message || "Singout failed"));
+        }
+        dispatch(signoutUserSuccess());
+      } catch {
+        dispatch(signoutUserFailure("Something went wrong"));
+      }
+    };
 
   return (
     <Sidebar aria-label="dashSideBar" className="w-full md:w-56">
@@ -69,6 +87,7 @@ export default function DashSideBar() {
             icon={HiTable}
             labelColor="dark"
             className="hover:bg-gray-300"
+            onClick={handleSignout}
           >
             Sign Out
           </SidebarItem>

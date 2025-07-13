@@ -9,7 +9,7 @@ import {
 } from "flowbite-react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { FaMoon } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import {
   Dropdown,
@@ -18,10 +18,28 @@ import {
   DropdownItem,
 } from "flowbite-react";
 import { HiLogout, HiViewGrid } from "react-icons/hi";
+import { signoutUserFailure, signoutUserSuccess } from "../redux/user/userSlice";
 
 export default function Header() {
   const path = useLocation().pathname;
   const { currentUser: user } = useSelector((state) => state.user);
+  const dispatch=useDispatch();
+
+   const handleSignout = async () => {
+      try {
+        const res = await fetch("/api/user/signout", {
+          method: "POST",
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const data = res.json();
+          dispatch(signoutUserFailure(data.message || "Singout failed"));
+        }
+        dispatch(signoutUserSuccess());
+      } catch {
+        dispatch(signoutUserFailure("Something went wrong"));
+      }
+    };
 
   return (
     <Navbar className="border-b-2 border-gray-200">
@@ -70,7 +88,7 @@ export default function Header() {
               <DropdownItem icon={HiViewGrid}>Profile</DropdownItem>
             </Link>
             <DropdownDivider />
-            <DropdownItem icon={HiLogout}>Sign out</DropdownItem>
+            <DropdownItem icon={HiLogout} onClick={handleSignout}>Sign out</DropdownItem>
           </Dropdown>
         ) : (
           <Link to="/sign-in">

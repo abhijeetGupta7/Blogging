@@ -1,7 +1,19 @@
-import { Alert, Button, FileInput, Select, Spinner, TextInput } from "flowbite-react";
+import {
+  Alert,
+  Button,
+  FileInput,
+  Select,
+  Spinner,
+  TextInput,
+} from "flowbite-react";
 import BlogEditor from "../components/BlogEditor";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
+  GEMINI_API_KEY;
 
 export default function CreatePost() {
   const [form, setForm] = useState({
@@ -12,11 +24,11 @@ export default function CreatePost() {
   });
 
   const [blogImageUrl, setBlogImageUrl] = useState(null);
-  const [error,setError]=useState(null);
-  const [loading,setLoading]=useState(false);
-  const navigate=useNavigate();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const navigate = useNavigate();
 
-  // Handle text/select input changes
   function handleChange(e) {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -25,7 +37,6 @@ export default function CreatePost() {
     }));
   }
 
-  // Handle file upload
   function handleImageChange(e) {
     const image = e.target.files[0];
     if (image) {
@@ -37,7 +48,6 @@ export default function CreatePost() {
     }
   }
 
-  // Handle content from BlogEditor (rich text editor)
   function handleContentChange(text) {
     setForm((prev) => ({
       ...prev,
@@ -45,7 +55,66 @@ export default function CreatePost() {
     }));
   }
 
-  // Handle form submit
+  // AI Generation function using Gemini
+  async function handleAIGenerate() {
+    const { title, category } = form;
+
+    if (!title || !category) {
+      setError(
+        "Please enter both title and category before using AI generation."
+      );
+      return;
+    }
+
+    setError(null);
+    setAiGenerating(true);
+
+    try {
+      const prompt = `
+Generate a high-quality blog post in HTML format based on the following inputs:
+
+Title: "${title}"
+Category: "${category}"
+
+Instructions:
+- Write engaging, well-structured content relevant to the title and category.
+- Format the output using ONLY valid HTML elements such as <h1>, <h2>, <p>, <ul>, <ol>, <blockquote>, <strong>, <em>, <span>, and <br>.
+- Include clear sections with headings, optional emojis, and short paragraphs.
+- Do NOT wrap the output in triple backticks or Markdown (no \`\`\`html or \`\`\`).
+- Do NOT include outer HTML tags like <html>, <head>, or <body>.
+- This HTML will be directly inserted into a WYSIWYG editor.
+`;
+
+      const res = await fetch(GEMINI_API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      });
+
+      const data = await res.json();
+      console.log(data);
+      const output = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      if (!output) throw new Error("No content returned from Gemini");
+      
+      const cleanHTML = output.replace(/^```html|```$/g, "").trim();
+
+      setForm((prev) => ({
+        ...prev,
+        content: cleanHTML,
+      }));
+    } catch (err) {
+      console.error("Gemini error:", err);
+      setError("Failed to generate content with AI.");
+    } finally {
+      setAiGenerating(false);
+    }
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
@@ -53,6 +122,7 @@ export default function CreatePost() {
 
     if (!title || !category || !content) {
       setError("Please fill all the fields");
+      setLoading(false);
       return;
     }
 
@@ -69,13 +139,10 @@ export default function CreatePost() {
         credentials: "include",
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to create post");
-      }
+      if (!res.ok) throw new Error("Failed to create post");
 
       const data = await res.json();
-      console.log("Post created:", data);
-      // Reset form
+
       setForm({
         title: "",
         category: "",
@@ -85,10 +152,10 @@ export default function CreatePost() {
       setBlogImageUrl(null);
       setLoading(false);
       navigate(`/post/${data.slug}`);
-
     } catch (error) {
       console.error("Error publishing post:", error);
       setError("Something went wrong while publishing the post.");
+      setLoading(false);
     }
   }
 
@@ -119,7 +186,31 @@ export default function CreatePost() {
             <option value="javascript">Javascript</option>
             <option value="react">React</option>
             <option value="css">CSS</option>
+            <option value="lifestyle">Lifestyle</option>
+            <option value="ai">AI</option>
           </Select>
+        </div>
+
+        {/* AI Disclaimer & Button */}
+        <div className="text-sm text-gray-500 italic">
+          * You can generate a blog post automatically using AI. Just provide a
+          title and category.
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button
+            type="button"
+            onClick={handleAIGenerate}
+            disabled={aiGenerating}
+          >
+            {aiGenerating ? (
+              <span className="flex items-center gap-2">
+                <Spinner size="sm" /> Generating...
+              </span>
+            ) : (
+              "Generate with AI"
+            )}
+          </Button>
         </div>
 
         {/* Image Upload */}
@@ -141,28 +232,21 @@ export default function CreatePost() {
         )}
 
         {/* Blog Content */}
-        <BlogEditor text={form.content} setText={handleContentChange} />
+        <BlogEditor text={form.content} setText={handleContentChange}/>
 
         {/* Submit Button */}
         <Button type="submit" size="sm" disabled={loading}>
-          {
-            loading ? (
-              <span className="flex items-center gap-2">
+          {loading ? (
+            <span className="flex items-center gap-2">
               <Spinner size="sm" /> Publishing...
             </span>
-            ) : (
-              "Publish Post"
-            )
-          }
+          ) : (
+            "Publish Post"
+          )}
         </Button>
 
-        {error && (
-          <Alert color="red"> 
-            {error}
-          </Alert>
-        )}
-        
-
+        {/* Error Display */}
+        {error && <Alert color="red">{error}</Alert>}
       </form>
     </div>
   );
