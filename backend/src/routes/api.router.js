@@ -2,12 +2,14 @@ const express=require('express');
 const userRouter = require('./routers/user.router');
 const authRouter = require('./routers/auth.route');
 const postRouter = require('./routers/post.router');
+const commentRouter = require('./routers/comment.route');
 
 const apiRouter=express.Router();
 
 apiRouter.use("/auth",authRouter)
 apiRouter.use("/user",userRouter)
 apiRouter.use("/post",postRouter)
+apiRouter.use("/comment",commentRouter)
 
 apiRouter.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

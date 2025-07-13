@@ -182,10 +182,24 @@ async function getUsers(req,res,next) {
   }
 };
 
+ async function getUser(req, res, next) {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return next(errorHandler(404, 'User not found'));
+    }
+    const { password, ...rest } = user.toObject();
+    return res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   updateProfile,
   deleteUser,
   signoutUser,
   getUsers,
-  deleteUserByAdmin
+  deleteUserByAdmin,
+  getUser
 }

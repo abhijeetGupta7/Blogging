@@ -38,7 +38,7 @@ postRouter.post(
 
 postRouter.get(
   '/getPosts',
-  authenticateUser, getPosts
+   getPosts
 );
 
 postRouter.delete(
