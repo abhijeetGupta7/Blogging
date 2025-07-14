@@ -68,6 +68,20 @@ export default function DashSideBar() {
             </SidebarItem>
           )}
 
+                 
+          {currentUser.isAdmin && (
+            <SidebarItem
+              as={Link}
+              to="/dashboard?tab=comments"
+              active={tab === "comments"}
+              icon={HiDocument}
+              labelColor="dark"
+              className="hover:bg-gray-300"
+            >
+              Comments
+            </SidebarItem>
+          )}
+
           
           {currentUser.isAdmin && (
             <SidebarItem

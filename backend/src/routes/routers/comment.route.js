@@ -2,7 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 const validateRequest = require('../../middlewares/validator');
 const { authenticateUser } = require('../../middlewares/autheticateUser');
-const { createComment, getPostComments, likeComment, editComment, deleteComment } = require('../../controllers/comment.controller');
+const { createComment, getPostComments, likeComment, editComment, deleteComment, getComments } = require('../../controllers/comment.controller');
 
 const commentRouter = express.Router();
 
@@ -35,5 +35,6 @@ commentRouter.get('/getPostComments/:postId', getPostComments);
 commentRouter.put('/likeComment/:commentId', authenticateUser, likeComment);
 commentRouter.put('/editComment/:commentId', authenticateUser, editComment);
 commentRouter.delete('/deleteComment/:commentId', authenticateUser, deleteComment);
+commentRouter.get('/getcomments', authenticateUser, getComments);
 
 module.exports = commentRouter;
