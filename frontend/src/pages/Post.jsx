@@ -2,12 +2,14 @@ import { Button, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import CommentSection from "../components/CommentSection";
+import PostCard from "../components/PostCard";
 
 export default function Post() {
   const { postSlug } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [post, setPost] = useState(null);
+  const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -34,6 +36,21 @@ export default function Post() {
     fetchPost();
   }, [postSlug]);
 
+  useEffect(() => {
+    try {
+      const fetchRecentPosts = async () => {
+        const res = await fetch(`/api/post/getposts?limit=4`);
+        const data = await res.json();
+        if (res.ok) {
+          setRecentPosts(data.posts);
+        }
+      };
+      fetchRecentPosts();
+    } catch (error) {
+      console.log(error.message);
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -51,12 +68,15 @@ export default function Post() {
   }
 
   return (
-    <main className="p-3 flex flex-col max-w-6xl mx-auto min-h-screen">
+    <main className='p-3 flex flex-col max-w-6xl mx-auto min-h-screen'>
       <h1 className="text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl">
         {post.title}
       </h1>
 
-      <Link to={`/search?category=${post.category}`} className="self-center mt-5">
+      <Link
+        to={`/search?category=${post.category}`}
+        className="self-center mt-5"
+      >
         <Button color="gray" pill size="xs">
           {post.category}
         </Button>
@@ -71,7 +91,8 @@ export default function Post() {
       <div className="flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">
         <span>{new Date(post.createdAt).toLocaleDateString()}</span>
         <span className="italic">
-          {Math.max(1, Math.ceil(parseInt(post.content.length)/100000))} min read
+          {Math.max(1, Math.ceil(parseInt(post.content.length) / 100000))} min
+          read
         </span>
       </div>
 
@@ -89,7 +110,15 @@ export default function Post() {
         dangerouslySetInnerHTML={{ __html: post.content }}
       ></div>
 
-      <CommentSection postId={post._id}/>
+      <CommentSection postId={post._id} />
+
+      <div className="flex flex-col justify-center items-center mb-5">
+        <h1 className="text-xl mt-5">Recent articles</h1>
+        <div className="flex flex-wrap gap-5 mt-5 justify-center">
+          {recentPosts &&
+            recentPosts.map((post) => <PostCard key={post._id} post={post} />)}
+        </div>
+      </div>
 
     </main>
   );
