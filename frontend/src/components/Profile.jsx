@@ -22,7 +22,7 @@ export default function DashProfile() {
   const [imageFileUrl, setImageFileUrl] = useState(null);
   const [formData, setFormData] = useState({});
   const [success, setSuccess] = useState(null);
-  const [changePassword, setChangePassword] = useState(false); // Toggle for password input
+  const [changePassword, setChangePassword] = useState(false); 
   const [showModal, setShowModal] = useState(false);
 
   const fileInputRef = useRef();
@@ -87,7 +87,7 @@ export default function DashProfile() {
         form.append("password", formData.password);
       if (formData.profileImage) form.append("file", formData.profileImage);
 
-      const res = await fetch("/api/user/profile", {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/profile`, {
         method: "PUT",
         body: form,
         credentials: "include",
@@ -108,7 +108,7 @@ export default function DashProfile() {
 
   const handleDeleteUser = async () => {
     try {
-      const res = await fetch("/api/user/delete", {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/delete`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -124,7 +124,7 @@ export default function DashProfile() {
 
   const handleSignout = async () => {
     try {
-      const res = await fetch("/api/user/signout", {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/signout`, {
         method: "POST",
         credentials: "include",
       });

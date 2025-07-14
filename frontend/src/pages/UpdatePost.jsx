@@ -57,7 +57,7 @@ export default function UpdatePost() {
     async function fetchPost() {
       try {
         setLoading(true);
-        const res = await fetch(`/api/post/getPosts?postId=${postId}`);
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/post/getPosts?postId=${postId}`);
         if (res.ok) {
           const data = await res.json();
           setForm(data.posts[0]);
@@ -95,7 +95,7 @@ export default function UpdatePost() {
       formData.append("content", content);
       if (image) formData.append("file", image);
 
-      const res = await fetch(`/api/post/update-post/${postId}`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/post/update-post/${postId}`, {
         method: "PATCH",
         body: formData,
         credentials: "include",

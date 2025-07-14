@@ -29,9 +29,9 @@ export default function DashUsers() {
     async function fetchUsers() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/user/getUsers`, {
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/getUsers`, {
           method: "GET",
-          credentials: "include"
+          credentials: "include",
         });
         if (res.ok) {
           const data = await res.json();
@@ -54,7 +54,10 @@ export default function DashUsers() {
     const startIndex = users.length;
     setLoading(true);
     try {
-      const res = await fetch(`/api/user/getUsers?startIndex=${startIndex}`);
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/getUsers?startIndex=${startIndex}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
       if (res.ok) {
         const data = await res.json();
         setUsers((prev) => [...prev, ...data.users]);
@@ -73,7 +76,7 @@ export default function DashUsers() {
   const handleUserDelete = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/delete/${userIdToDelete}`, {
         method: "DELETE",
         credentials: "include"
       });

@@ -133,7 +133,7 @@ Instructions:
       formData.append("content", content);
       if (image) formData.append("file", image);
 
-      const res = await fetch("/api/post/create", {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/post/create`, {
         method: "POST",
         body: formData,
         credentials: "include",

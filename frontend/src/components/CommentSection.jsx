@@ -9,7 +9,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import Comment from './Comment'; // Individual comment component
+import Comment from './Comment';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
 
 export default function CommentSection({ postId }) {
@@ -40,8 +40,9 @@ export default function CommentSection({ postId }) {
 
     setSubmitLoading(true);
     try {
-      const res = await fetch('/api/comment/create', {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/create`, {
         method: 'POST',
+        credentials:'include',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -74,7 +75,9 @@ export default function CommentSection({ postId }) {
     const getComments = async () => {
       setLoadingComments(true);
       try {
-        const res = await fetch(`/api/comment/getPostComments/${postId}`);
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/getPostComments/${postId}`, {
+          credentials:"include"
+        });
         if (res.ok) {
           const data = await res.json();
           setComments(data);
@@ -97,8 +100,9 @@ export default function CommentSection({ postId }) {
 
     setLikingCommentId(commentId);
     try {
-      const res = await fetch(`/api/comment/likeComment/${commentId}`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/likeComment/${commentId}`, {
         method: 'PUT',
+        credentials:"include"
       });
 
       if (res.ok) {
@@ -142,8 +146,9 @@ export default function CommentSection({ postId }) {
     setDeletingCommentId(commentId);
     setShowModal(false);
     try {
-      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/deleteComment/${commentId}`, {
         method: 'DELETE',
+        credentials:"include"
       });
 
       if (res.ok) {

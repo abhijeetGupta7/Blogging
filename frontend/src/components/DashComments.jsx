@@ -30,7 +30,9 @@ export default function DashComments() {
     const fetchComments = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`/api/comment/getcomments`);
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/getcomments`, {
+            credentials:'include'
+        });
         const data = await res.json();
         if (res.ok) {
           setComments(data.comments);
@@ -53,7 +55,9 @@ export default function DashComments() {
     const startIndex = comments.length;
     setLoading(true);
     try {
-      const res = await fetch(`/api/comment/getcomments?startIndex=${startIndex}`);
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/getcomments?startIndex=${startIndex}`,{
+        credentials:"include"
+      });
       const data = await res.json();
       if (res.ok) {
         setComments((prev) => [...prev, ...data.comments]);
@@ -71,8 +75,9 @@ export default function DashComments() {
   const handleDeleteComment = async () => {
     setDeleting(true);
     try {
-      const res = await fetch(`/api/comment/deleteComment/${commentIdToDelete}`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/comment/deleteComment/${commentIdToDelete}`, {
         method: "DELETE",
+        credentials:'include'
       });
       if (res.ok) {
         setComments((prev) => prev.filter((c) => c._id !== commentIdToDelete));

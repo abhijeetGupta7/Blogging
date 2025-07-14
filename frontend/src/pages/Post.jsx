@@ -15,7 +15,7 @@ export default function Post() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/post/getposts?slug=${postSlug}`);
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/post/getposts?slug=${postSlug}`);
         const data = await res.json();
 
         if (!res.ok || !data.posts || data.posts.length === 0) {
@@ -39,7 +39,7 @@ export default function Post() {
   useEffect(() => {
     try {
       const fetchRecentPosts = async () => {
-        const res = await fetch(`/api/post/getposts?limit=4`);
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/post/getposts?limit=4`);
         const data = await res.json();
         if (res.ok) {
           setRecentPosts(data.posts);

@@ -18,7 +18,7 @@ export default function Search() {
 
   const fetchPosts = async (params) => {
     setLoading(true);
-    const res = await fetch(`/api/post/getposts?${params}`);
+    const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/post/getposts?${params}`);
     if (!res.ok) {
       setLoading(false);
       return;

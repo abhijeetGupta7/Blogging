@@ -25,7 +25,7 @@ export default function DashSideBar() {
 
    const handleSignout = async () => {
       try {
-        const res = await fetch("/api/user/signout", {
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/user/signout`, {
           method: "POST",
           credentials: "include",
         });
@@ -44,6 +44,7 @@ export default function DashSideBar() {
       <SidebarItems>
         <SidebarItemGroup>
 
+          { currentUser.isAdmin && (
            <SidebarItem
             as={Link}
             to="/dashboard?tab=dash"
@@ -54,6 +55,7 @@ export default function DashSideBar() {
           >
             Dashboard
           </SidebarItem>
+          )}
 
           <SidebarItem
             as={Link}
