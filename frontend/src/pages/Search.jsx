@@ -1,5 +1,5 @@
-import { Button, Select, TextInput } from 'flowbite-react';
-import { useEffect, useState } from 'react';
+import { Button, Select, TextInput, Spinner } from 'flowbite-react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import PostCard from '../components/PostCard';
 
@@ -10,104 +10,79 @@ export default function Search() {
     category: 'uncategorized',
   });
 
-  console.log(sidebarData);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
-
   const location = useLocation();
-
   const navigate = useNavigate();
+
+  const fetchPosts = async (params) => {
+    setLoading(true);
+    const res = await fetch(`/api/post/getposts?${params}`);
+    if (!res.ok) {
+      setLoading(false);
+      return;
+    }
+    const data = await res.json();
+    setPosts(data.posts);
+    setLoading(false);
+    setShowMore(data.posts.length ===9);
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const searchTermFromUrl = urlParams.get('searchTerm');
-    const sortFromUrl = urlParams.get('sort');
-    const categoryFromUrl = urlParams.get('category');
-    if (searchTermFromUrl || sortFromUrl || categoryFromUrl) {
-      setSidebarData({
-        ...sidebarData,
-        searchTerm: searchTermFromUrl,
-        sort: sortFromUrl,
-        category: categoryFromUrl,
-      });
-    }
+    const searchTermFromUrl = urlParams.get('searchTerm') || '';
+    const sortFromUrl = urlParams.get('sort') || 'desc';
+    const categoryFromUrl = urlParams.get('category') || 'uncategorized';
 
-    const fetchPosts = async () => {
-      setLoading(true);
-      const searchQuery = urlParams.toString();
-      const res = await fetch(`/api/post/getposts?${searchQuery}`);
-      if (!res.ok) {
-        setLoading(false);
-        return;
-      }
-      if (res.ok) {
-        const data = await res.json();
-        setPosts(data.posts);
-        setLoading(false);
-        if (data.posts.length === 9) {
-          setShowMore(true);
-        } else {
-          setShowMore(false);
-        }
-      }
-    };
-    fetchPosts();
+    setSidebarData((prev) => ({
+      ...prev,
+      searchTerm: searchTermFromUrl,
+      sort: sortFromUrl,
+      category: categoryFromUrl,
+    }));
+
+    fetchPosts(urlParams.toString());
   }, [location.search]);
 
-  const handleChange = (e) => {
-    if (e.target.id === 'searchTerm') {
-      setSidebarData({ ...sidebarData, searchTerm: e.target.value });
-    }
-    if (e.target.id === 'sort') {
-      const order = e.target.value || 'desc';
-      setSidebarData({ ...sidebarData, sort: order });
-    }
-    if (e.target.id === 'category') {
-      const category = e.target.value || 'uncategorized';
-      setSidebarData({ ...sidebarData, category });
-    }
-  };
+  const handleChange = useCallback((e) => {
+    const { id, value } = e.target;
+    setSidebarData((prev) => ({ ...prev, [id]: value }));
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const urlParams = new URLSearchParams(location.search);
-    urlParams.set('searchTerm', sidebarData.searchTerm);
-    urlParams.set('sort', sidebarData.sort);
-    urlParams.set('category', sidebarData.category);
-    const searchQuery = urlParams.toString();
-    navigate(`/search?${searchQuery}`);
+    const params = new URLSearchParams();
+
+    if (sidebarData.searchTerm) params.set('searchTerm', sidebarData.searchTerm);
+    if (sidebarData.sort) params.set('sort', sidebarData.sort);
+    if (sidebarData.category) params.set('category', sidebarData.category);
+
+    navigate(`/search?${params.toString()}`);
   };
 
   const handleShowMore = async () => {
-    const numberOfPosts = posts.length;
-    const startIndex = numberOfPosts;
+    const startIndex = posts.length;
     const urlParams = new URLSearchParams(location.search);
     urlParams.set('startIndex', startIndex);
     const searchQuery = urlParams.toString();
     const res = await fetch(`/api/post/getposts?${searchQuery}`);
-    if (!res.ok) {
-      return;
-    }
-    if (res.ok) {
-      const data = await res.json();
-      setPosts([...posts, ...data.posts]);
-      if (data.posts.length === 9) {
-        setShowMore(true);
-      } else {
-        setShowMore(false);
-      }
-    }
+    if (!res.ok) return;
+
+    const data = await res.json();
+    setPosts((prev) => [...prev, ...data.posts]);
+    setShowMore(data.posts.length === 9);
   };
+
+  const categories = ['uncategorized', 'react', 'nextjs', 'lifestyle', 'ai', 'javascript'];
 
   return (
     <div className='flex flex-col md:flex-row'>
+      {/* Sidebar */}
       <div className='p-7 border-b md:border-r md:min-h-screen border-gray-500'>
         <form className='flex flex-col gap-8' onSubmit={handleSubmit}>
-          <div className='flex   items-center gap-2'>
-            <label className='whitespace-nowrap font-semibold'>
-              Search Term:
-            </label>
+          <div className='flex items-center gap-2'>
+            <label className='whitespace-nowrap font-semibold'>Search Term:</label>
             <TextInput
               placeholder='Search...'
               id='searchTerm'
@@ -118,25 +93,19 @@ export default function Search() {
           </div>
           <div className='flex items-center gap-2'>
             <label className='font-semibold'>Sort:</label>
-            <Select className='w-20' onChange={handleChange} value={sidebarData.sort} id='sort'>
+            <Select className='w-20' id='sort' value={sidebarData.sort} onChange={handleChange}>
               <option value='desc'>Latest</option>
               <option value='asc'>Oldest</option>
             </Select>
           </div>
           <div className='flex items-center gap-2'>
             <label className='font-semibold'>Category:</label>
-            <Select
-              className='w-35'
-              onChange={handleChange}
-              value={sidebarData.category}
-              id='category'
-            >
-              <option value='uncategorized'>Uncategorized</option>
-              <option value='react'>React</option>
-              <option value='nextjs'>Next.js</option>
-              <option value='lifestyle'>Lifestyle</option>
-              <option value='ai'>AI</option>
-              <option value='javascript'>JavaScript</option>
+            <Select className='w-35' id='category' value={sidebarData.category} onChange={handleChange}>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </option>
+              ))}
             </Select>
           </div>
           <Button type='submit' outline>
@@ -144,19 +113,27 @@ export default function Search() {
           </Button>
         </form>
       </div>
+
+      {/* Posts */}
       <div className='w-full'>
-        <h1 className='text-3xl font-semibold sm:border-b border-gray-500 p-3 mt-5 '>
+        <h1 className='text-3xl font-semibold sm:border-b border-gray-500 p-3 mt-5'>
           Posts results:
         </h1>
         <div className='p-7 flex flex-wrap gap-4'>
           {!loading && posts.length === 0 && (
             <p className='text-xl text-gray-500'>No posts found.</p>
           )}
-          {loading && <p className='text-xl text-gray-500'>Loading...</p>}
+
+          {loading && (
+            <div className='flex justify-center items-center w-full py-10'>
+              <Spinner size='xl' color='info' aria-label='Loading posts' />
+            </div>
+          )}
+
           {!loading &&
-            posts &&
             posts.map((post) => <PostCard key={post._id} post={post} />)}
-          {showMore && (
+
+          {showMore && !loading && (
             <button
               onClick={handleShowMore}
               className='text-teal-500 text-lg hover:underline p-7 w-full'

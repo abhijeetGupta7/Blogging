@@ -1,5 +1,5 @@
 const express=require('express');
-const { PORT } = require('./config/server-config');
+const { PORT, CLIENT_URL } = require('./config/server-config');
 const { connecToDB } = require('./config/db-config');
 const cors=require('cors');
 const apiRouter = require('./routes/api.router');
@@ -10,7 +10,7 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cors({
-    origin: "*",
+    origin: CLIENT_URL,
     credentials:true
 }));
 
