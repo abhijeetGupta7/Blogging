@@ -12,6 +12,7 @@ import OnlyAdminPrivateRoute from './components/OnlyAdminPrivateRoute';
 import CreatePost from './pages/CreatePost';
 import UpdatePost from './pages/UpdatePost';
 import Post from './pages/Post';
+import Search from './pages/Search';
 
 function App() {
   
@@ -36,6 +37,7 @@ function App() {
        
         <Route path='/about' element={<About />}/>
         <Route path='/sign-in' element={<SignIn />}/>
+        <Route path='/search' element={<Search />}/>
         <Route path='/sign-up' element={<SignUp />}/>
         <Route path='/projects' element={<Projects />}/>
       </Routes>

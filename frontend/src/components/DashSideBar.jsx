@@ -9,7 +9,7 @@ import { HiDocument, HiTable, HiUser, HiUsers } from "react-icons/hi";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { signoutUserFailure, signoutUserSuccess } from "../redux/user/userSlice";
-
+import { HiAcademicCap } from "react-icons/hi2";
 
 export default function DashSideBar() {
   const location = useLocation();
@@ -43,6 +43,17 @@ export default function DashSideBar() {
     <Sidebar aria-label="dashSideBar" className="w-full md:w-56">
       <SidebarItems>
         <SidebarItemGroup>
+
+           <SidebarItem
+            as={Link}
+            to="/dashboard?tab=dash"
+            active={tab === "dash"}
+            icon={HiAcademicCap}
+            labelColor="dark"
+            className="hover:bg-gray-300"
+          >
+            Dashboard
+          </SidebarItem>
 
           <SidebarItem
             as={Link}

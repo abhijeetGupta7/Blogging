@@ -29,6 +29,7 @@ export default function DashPosts() {
       const res = await fetch(`/api/post/getPosts?userId=${currentUser._id}`);
       if (res.ok) {
         const data = await res.json();
+        console.log(data.posts);
         setPosts(data.posts);
         if (data.posts.length < 9) {
           setShowMore(false);
@@ -90,7 +91,7 @@ export default function DashPosts() {
         <p className="text-gray-500">No posts found.</p>
       ) : (
         <>
-          <Table hoverable>
+          <Table hoverable className="text-white">
             <TableHead>
               <TableRow>
                 <TableHeadCell>Date updated</TableHeadCell>
@@ -123,7 +124,7 @@ export default function DashPosts() {
                       {post.title}
                     </Link>
                   </TableCell>
-                  <TableCell className="px-6 py-4">{post.category}</TableCell>
+                  <TableCell className="px-6 py-4  text-gray-900">{post.category}</TableCell>
                   <TableCell className="px-6 py-4">
                     <span
                       className="font-medium text-red-500 hover:underline cursor-pointer"
