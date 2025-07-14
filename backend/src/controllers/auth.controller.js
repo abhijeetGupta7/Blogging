@@ -90,7 +90,9 @@ const google = async (req, res, next) => {
       return res
         .status(200)
         .cookie('access_token', token, {
-          httpOnly: true,
+              httpOnly: true,
+        secure: true, 
+        sameSite:"None"
         })
         .json(rest);
     } else {
