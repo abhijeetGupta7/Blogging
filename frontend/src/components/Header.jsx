@@ -87,10 +87,7 @@ export default function Header() {
       </Button>
 
       <div className="flex gap-3 md:order-2">
-        <Button className="w-12 h-10 hidden sm:inline" color="gray" pill>
-          <FaMoon />
-        </Button>
-
+  
         {user ? (
           <Dropdown 
             arrowIcon={false}
